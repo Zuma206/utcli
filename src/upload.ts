@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { UTFile } from "uploadthing/server";
 import { createUTApi } from "./shared";
 import { Command } from "commander";
+import { UploadedFileData } from "uploadthing/types";
 
 export function loadUploadCommand(program: Command) {
   program
@@ -11,29 +12,18 @@ export function loadUploadCommand(program: Command) {
     .argument("<filepaths...>", "A list of files to upload")
     .action(function (filepaths: string[], options: { manifest?: string }) {
       const utapi = createUTApi();
-      const manifest: unknown[] = [];
+      const manifest: UploadedFileData[] = [];
+      let i = 0;
 
       filepaths.forEach(async (filepath) => {
         const file = await readUTFile(filepath);
         const result = await utapi.uploadFiles(file);
-        let n = 0;
+
         if (result.data) {
-          console.log(
-            `Successfully uploaded ${JSON.stringify(filepath)} [${++n}/${
-              filepaths.length
-            }]`
-          );
-          console.log(`Key: ${result.data.key}`);
-          console.log(`URL: ${result.data.url}`);
-          console.log(`App URL: ${result.data.appUrl}`);
-          console.log(`MIME Type: ${result.data.type}\n`);
+          logUploadedFileData(result.data, ++i, filepaths.length);
           manifest.push(result.data);
         } else {
-          console.error(
-            `Could not upload ${JSON.stringify(filepath)} [${++n}/${
-              filepath.length
-            }]`
-          );
+          logFailedFileUpload(filepath, ++i, filepaths.length);
         }
 
         if (options.manifest) {
@@ -46,4 +36,22 @@ export function loadUploadCommand(program: Command) {
 async function readUTFile(path: string) {
   const buffer = await readFile(path);
   return new UTFile([new Blob([buffer])], path);
+}
+
+function logUploadedFileData(
+  uploadedFileData: UploadedFileData,
+  i: number,
+  n: number
+) {
+  console.log(
+    `Successfully uploaded ${JSON.stringify(uploadedFileData.name)} [${i}/${n}]`
+  );
+  console.log(`Key: ${uploadedFileData.key}`);
+  console.log(`URL: ${uploadedFileData.url}`);
+  console.log(`App URL: ${uploadedFileData.appUrl}`);
+  console.log(`MIME Type: ${uploadedFileData.type}\n`);
+}
+
+function logFailedFileUpload(filepath: string, i: number, n: number) {
+  console.error(`Could not upload ${JSON.stringify(filepath)} [${i}/${n}]`);
 }
