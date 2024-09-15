@@ -2,7 +2,10 @@
   "name": "utcli",
   "version": "0.0.0",
   "description": "An unofficial uploadthing cli tool",
-  "scripts": {},
+  "bin": "./dist/main.js",
+  "scripts": {
+    "build": "tsc && tsup"
+  },
   "keywords": [
     "uploadthing",
     "cli",
@@ -10,5 +13,9 @@
     "utfs.io"
   ],
   "author": "Zuma206",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.2.4",
+    "typescript": "^5.6.2"
+  }
 }
