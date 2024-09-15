@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { UTApi, UTFile } from "uploadthing/server";
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { program } from "commander";
 import { exit } from "process";
 
@@ -9,9 +9,12 @@ program.version("0.0.0");
 program
   .command("upload")
   .description("Upload a list of files")
+  .option("-m, --manifest <path>", "A JSON file to write upload details to")
   .argument("<filepaths...>", "A list of files to upload")
-  .action(function (filepaths: string[]) {
+  .action(function (filepaths: string[], options: { manifest?: string }) {
     const utapi = createUTApi();
+    const manifest: unknown[] = [];
+
     filepaths.forEach(async (filepath) => {
       const file = await readUTFile(filepath);
       const result = await utapi.uploadFiles(file);
@@ -26,12 +29,17 @@ program
         console.log(`URL: ${result.data.url}`);
         console.log(`App URL: ${result.data.appUrl}`);
         console.log(`MIME Type: ${result.data.type}\n`);
+        manifest.push(result.data);
       } else {
         console.error(
           `Could not upload ${JSON.stringify(filepath)} [${++n}/${
             filepath.length
           }]`
         );
+      }
+
+      if (options.manifest) {
+        await writeFile(options.manifest, JSON.stringify(manifest, null, 2));
       }
     });
   });
