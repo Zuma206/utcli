@@ -1,3 +1,6 @@
 #!/usr/bin/env node
+import { program } from "commander";
 
-console.log("Hello, World!");
+program.version("0.0.0");
+
+program.parse(process.argv);
