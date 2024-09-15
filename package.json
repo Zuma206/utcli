@@ -1,0 +1,14 @@
+{
+  "name": "utcli",
+  "version": "0.0.0",
+  "description": "An unofficial uploadthing cli tool",
+  "scripts": {},
+  "keywords": [
+    "uploadthing",
+    "cli",
+    "utfs",
+    "utfs.io"
+  ],
+  "author": "Zuma206",
+  "license": "MIT"
+}
