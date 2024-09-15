@@ -8,6 +8,7 @@ program.version("0.0.0");
 
 program
   .command("upload")
+  .description("Upload a list of files")
   .argument("<filepaths...>", "A list of files to upload")
   .action(function (filepaths: string[]) {
     const utapi = createUTApi();
@@ -35,6 +36,26 @@ program
     });
   });
 
+program
+  .command("list")
+  .description("Get a list of all files in utfs")
+  .option(
+    "-l, --limit [count]",
+    "The maximum amount of files to list",
+    safeParseInt
+  )
+  .option("-o, --offset [count]", "The number of files to skip", safeParseInt)
+  .action(async (options: { limit?: number; offset?: number }) => {
+    const utapi = createUTApi();
+    const { files, hasMore } = await utapi.listFiles(options);
+    files.forEach((file, index) => {
+      console.log(`Name: ${JSON.stringify(file.name)}`);
+      console.log(`Key: ${file.key}`);
+      console.log(`Offset: ${index + (options.offset ?? 0)}\n`);
+    });
+    hasMore && console.log("More available...\n");
+  });
+
 program.parse(process.argv);
 
 function createUTApi() {
@@ -50,4 +71,15 @@ function createUTApi() {
 async function readUTFile(path: string) {
   const buffer = await readFile(path);
   return new UTFile([new Blob([buffer])], path);
+}
+
+function safeParseInt(text: string) {
+  try {
+    const result = parseInt(text);
+    if (isNaN(result)) throw new Error("Got NaN");
+    return result;
+  } catch (err) {
+    console.error(`${JSON.stringify(text)} is not a valid number`);
+    exit(1);
+  }
 }
