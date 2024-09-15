@@ -17,7 +17,7 @@ program
       let n = 0;
       if (result.data) {
         console.log(
-          `Successfully uploaded ${JSON.stringify(result.data.name)} [${++n}/${
+          `Successfully uploaded ${JSON.stringify(filepath)} [${++n}/${
             filepaths.length
           }]`
         );
@@ -26,6 +26,11 @@ program
         console.log(`App URL: ${result.data.appUrl}`);
         console.log(`MIME Type: ${result.data.type}\n`);
       } else {
+        console.error(
+          `Could not upload ${JSON.stringify(filepath)} [${++n}/${
+            filepath.length
+          }]`
+        );
       }
     });
   });
